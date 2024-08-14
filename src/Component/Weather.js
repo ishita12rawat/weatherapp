@@ -1,66 +1,61 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 function Weather() {
-    const [value, setValue] = useState("");
-    const [search, setSearch] = useState("");
-    const [temperature, setTemperature] = useState(null);
-    const [humidity, setHumidity] = useState(null);
-    const [cityName, setCityName] = useState("");
+    const [city, setCity] = useState('');
+    const [weather, setWeather] = useState(null);
 
-    const API_KEY = "6d83156e4e40ca97d0c6924b832fe00c";
 
     const fetchWeather = async () => {
-        const url = `https://api.openweathermap.org/data/2.5/weather?q=${search}&appid=${API_KEY}&units=metric`;
+        const API_KEY = "6d83156e4e40ca97d0c6924b832fe00c";
+        const API_URL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
 
         try {
-            const response = await fetch(url);
+            let response = await fetch(API_URL);
+
             if (!response.ok) {
-                throw new Error("City not found");
+                throw new Error('City not found');
             }
-            const data = await response.json();
-            setTemperature(data.main.temp);
-            setCityName(data.name);
-            setHumidity(data.main.humidity);
-        } catch (error) {
-            console.error("Error fetching weather data:", error);
-            setTemperature(null);
-            setHumidity(null);
-            setCityName("");
-        }
-    };
 
-    useEffect(() => {
-        if (search) {
-            fetchWeather();
+            let data = await response.json();
+            setWeather(data);
+        
+        } catch (err) {
+           console.log(err)
+            setWeather(null);
         }
-    }, [search]);
-
-    const handleSearch = () => {
-        setSearch(value);
-        setValue("");
     };
 
     return (
-        <div className="w-full min-h-screen bg-gray-800 flex flex-col items-center justify-center p-4">
-            <div className="flex  items-center gap-4 mb-6">
+        <div className="text-gray-800 bg-slate-800 w-full min-h-screen">
+            <div className="container">
+                <h1 className="text-3xl font-bold text-center text-white">Weather App</h1>
+            </div>
+            <div className="flex justify-center mb-6">
                 <input
                     type="text"
-                    className="p-3 rounded-lg w-50 max-w-md text-gray-900"
-                    placeholder="Enter city"
-                    value={value}
-                    onChange={(e) => setValue(e.target.value)}
+                    placeholder="Enter city..."
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="border border-gray-300 rounded-lg py-2 px-4 w-1/2"
                 />
                 <button
-                    onClick={handleSearch}
-                    className="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition"
+                    onClick={fetchWeather}
+                    className="ml-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
                 >
-                    Search
+                    Get Weather
                 </button>
             </div>
-            <div className="bg-gray-700 text-white p-6 rounded-lg shadow-lg">
-                <h2 className="text-xl font-semibold">Temperature: {temperature !== null ? `${temperature} °C` : "N/A"}</h2>
-                <h2 className="text-xl font-semibold">City: {cityName || "N/A"}</h2>
-                <h2 className="text-xl font-semibold">Humidity: {humidity !== null ? `${humidity} %` : "N/A"}</h2>
+            <div className="flex flex-col items-center">
+             
+                {weather && (
+                    <div className="text-white text-lg">
+                        <h2 className="text-2xl font-bold">{weather.name}</h2>
+                        <p>Temperature: {weather.main.temp} °C</p>
+                        <p>Weather: {weather.weather[0].description}</p>
+                        <p>Humidity: {weather.main.humidity}%</p>
+                        <p>Wind Speed: {weather.wind.speed} m/s</p>
+                    </div>
+                )}
             </div>
         </div>
     );
